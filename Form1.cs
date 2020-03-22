@@ -28,7 +28,9 @@ namespace LabelMeXML_Parser
 
             this.Text = "LabelMe XML to Training Data CSV";
 
-            TextBox_outputFile.Text = outputFileName;
+            textBox_outputFile.Text = outputFileName;
+
+            panel_export.Visible = false;
         }
 
         /*
@@ -54,9 +56,12 @@ namespace LabelMeXML_Parser
                 files = Directory.GetFiles(browsedFolderPath, "*.xml", SearchOption.TopDirectoryOnly);
 
                 numFilesLabel.Text = "Number of XML files: " + files.Length;
+
+                if (!panel_export.Visible)
+                    panel_export.Visible = true;
             }
 
-            TextBox_filePath.Text = browsedFolderPath;
+            textBox_filePath.Text = browsedFolderPath;
         }
 
         private void BrowseForXMLFile()
@@ -82,35 +87,111 @@ namespace LabelMeXML_Parser
             }
 
             //textBox1.Show(fileContent, "File Content at path: " + filePath, MessageBoxButtons.OK);
-            TextBox_filePath.Text = filePath;
+            textBox_filePath.Text = filePath;
         }
+
+        private string outputPath = "";
 
         private void ButtonConvert_Click(object sender, EventArgs e)
         {
-            ConvertXMLFiles();
+            SaveToCSV();
         }
 
+        private void SaveToCSV()
+        {
+            // Browse for directory to export to
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "csv files (*.csv)|*.csv|All files (*.*)|*.*";
+            saveFileDialog.FilterIndex = 2;
+            saveFileDialog.RestoreDirectory = true;
+            saveFileDialog.FileName = textBox_outputFile.Text;
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                // Get output path
+                outputPath = saveFileDialog.FileName;
+                //debugLabel.Text = outputPath;
+
+                // Process the XML files to export into CSV
+                ConvertXMLFiles();
+            }
+        }
+        
         private void ConvertXMLFiles()
         {
+            // create new training data list
+            trainingObjects = new List<TrainingObject>();
+
+            // initialize export values
+            oneObjectClass = (!string.IsNullOrEmpty(textBox_objectClass.Text));
+
+            // retrieve all object data from XML files
             foreach (var file in files)
             {
                 OpenXMLFile(file);
             }
+
+            // convert training data into CSV string
+            TrainingData trainingData = new TrainingData("headers.txt");
+            foreach (TrainingObject obj in trainingObjects)
+            {
+                trainingData.AddToCSV(obj);
+            }
+
+            // Export to CSV
+            using (StreamWriter file = new StreamWriter(outputPath))
+            {
+                file.WriteLine(trainingData.BuiltText);
+            }
+
+            // Complete
+            debugLabel.Text = "Export Complete";
         }
+
+        private List<TrainingObject> trainingObjects = null;
+        private bool oneObjectClass = false;    // whether to export only a specific object or not (keyed into textBox_objectClass)
 
         private void OpenXMLFile(string file)
         {
-            //var doc = XDocument.Load(file);
-            //var result = doc.Descendants("YearsPlayed").Any(yearsplayed => Convert.ToInt32(yearsplayed.Value) > 15);
-
-            //Console.WriteLine(doc.ToString());
-            //debugLabel.Text = doc.ToString();
-
+            // Open XML file
             FileStream fs = new FileStream(file, FileMode.Open);
+
+            // Deserialize XML file into data model
             XmlSerializer serializer = new XmlSerializer(typeof(LabelMeAnnotation));
             LabelMeAnnotation labelMeAnnotation = (LabelMeAnnotation)serializer.Deserialize(fs);
 
-            debugLabel.Text = labelMeAnnotation.ToString();
+            // set debug label to display data
+            //debugLabel.Text = labelMeAnnotation.ToString();
+
+            // create TrainingObject record(s)
+            if (labelMeAnnotation.objects == null)  // no bounding boxes; bounding box is entire image
+            {
+                // Create Training Data object
+                TrainingObject trainingObj = CreateTrainingObject(labelMeAnnotation, null);
+                trainingObjects.Add(trainingObj);
+            }
+            else    // one LabelMeObject per bounding box
+            {
+                foreach (LabelMeObject obj in labelMeAnnotation.objects)
+                {
+                    // Check if object name is correct, if only one object to be exported
+                    if (oneObjectClass && obj.name != textBox_objectClass.Text)
+                        continue;
+
+                    // Create Training Data object
+                    TrainingObject trainingObj = CreateTrainingObject(labelMeAnnotation, obj);
+                    trainingObjects.Add(trainingObj);
+                }
+            }
+        }
+
+        private TrainingObject CreateTrainingObject(LabelMeAnnotation annotation, LabelMeObject obj)
+        {
+            return new TrainingObject(annotation,
+                                        obj,
+                                        textBox_imageSource.Text,
+                                        oneObjectClass ? textBox_objectLabelName.Text : ""
+                                     );
         }
     }
 }

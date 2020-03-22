@@ -4,15 +4,29 @@ using System.Xml.Serialization;
 
 namespace LabelMeXML_Parser.Model
 {
-    public class Imagesize
+    public class LabelMeImagesize
     {
-        [XmlElement]
-        public int nrows;
-        [XmlElement]
-        public int ncols;
+        [XmlElement("nrows")]
+        public int height;
+        [XmlElement("ncols")]
+        public int width;
     }
 
-    public class Object
+    public class LabelMePolygon
+    {
+        [XmlElement]
+        public LabelMePoint[] pt;
+    }
+
+    public class LabelMePoint
+    {
+        [XmlElement]
+        public int x;
+        [XmlElement]
+        public int y;
+    }
+
+    public class LabelMeObject
     {
         [XmlElement]
         public string name;
@@ -23,21 +37,36 @@ namespace LabelMeXML_Parser.Model
         [XmlElement]
         public string occluded;
         [XmlElement]
-        public Polygon polygon;
-    }
+        public string attributes;   // comma-separated string
+        [XmlElement]
+        public LabelMePolygon polygon;
 
-    public class Polygon
-    {
-        [XmlElement]
-        public Point[] pt;
-    }
+        private string[] attributesList = null;
 
-    public class Point
-    {
-        [XmlElement]
-        public int x;
-        [XmlElement]
-        public int y;
+        public int IsOccluded()
+        {
+            switch (occluded.ToLower())
+            {
+                case "no":
+                    return 0;
+                case "yes":
+                    return 1;
+                default:
+                    return 0;
+            }
+        }
+
+        public int HasAttribute(string attribute)
+        {
+            if (attributesList == null)
+                attributesList = attributes.Split(',');
+
+            foreach (string attr in attributesList)
+                if (attr.ToLower() == attribute.ToLower())
+                    return 1;   // true
+
+            return 0;   // false
+        }
     }
 
     [XmlRoot("annotation")]
@@ -46,31 +75,31 @@ namespace LabelMeXML_Parser.Model
         [XmlElement]
         public string filename;
         [XmlElement]
-        public Imagesize imagesize;
+        public LabelMeImagesize imagesize;
         [XmlElement("object")]
-        public Object[] objects;
+        public LabelMeObject[] objects;
 
         public override string ToString()
         {
-            string text = "filename: " + filename + "\n" +
-                "imagesize: " + imagesize.nrows + ", " + imagesize.ncols + "\n" +
+            string str = "filename: " + filename + "\n" +
+                "imagesize: " + imagesize.height + ", " + imagesize.width + "\n" +
                 "objects:\n";
 
-            foreach (Object obj in objects)
+            foreach (LabelMeObject obj in objects)
             {
-                text += "  name: " + obj.name +
+                str += "  name: " + obj.name +
                     ", deleted: " + obj.deleted +
                     ", verified: " + obj.verified +
                     ", occluded: " + obj.occluded + ",\n" +
                     "    polygon: ";
-                foreach (Point p in obj.polygon.pt)
+                foreach (LabelMePoint p in obj.polygon.pt)
                 {
-                    text += "pt<" + p.x + "," + p.y + ">,";
+                    str += "pt<" + p.x + "," + p.y + ">,";
                 }
-                text += "\n";
+                str += "\n";
             }
 
-            return text;
+            return str;
         }
     }
 }
