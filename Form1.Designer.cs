@@ -41,7 +41,6 @@
             this.textBox_objectLabelName = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
             this.textBox_imageSource = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.panel_export = new System.Windows.Forms.Panel();
@@ -78,7 +77,7 @@
             // 
             // button_Convert
             // 
-            this.button_Convert.Location = new System.Drawing.Point(432, 133);
+            this.button_Convert.Location = new System.Drawing.Point(432, 114);
             this.button_Convert.Name = "button_Convert";
             this.button_Convert.Size = new System.Drawing.Size(113, 23);
             this.button_Convert.TabIndex = 6;
@@ -89,7 +88,7 @@
             // debugLabel
             // 
             this.debugLabel.AutoSize = true;
-            this.debugLabel.Location = new System.Drawing.Point(257, 169);
+            this.debugLabel.Location = new System.Drawing.Point(257, 140);
             this.debugLabel.Name = "debugLabel";
             this.debugLabel.Size = new System.Drawing.Size(74, 17);
             this.debugLabel.TabIndex = 4;
@@ -107,7 +106,7 @@
             // 
             // textBox_outputFile
             // 
-            this.textBox_outputFile.Location = new System.Drawing.Point(260, 134);
+            this.textBox_outputFile.Location = new System.Drawing.Point(260, 115);
             this.textBox_outputFile.Name = "textBox_outputFile";
             this.textBox_outputFile.Size = new System.Drawing.Size(166, 22);
             this.textBox_outputFile.TabIndex = 5;
@@ -115,7 +114,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(177, 137);
+            this.label2.Location = new System.Drawing.Point(177, 118);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(77, 17);
             this.label2.TabIndex = 7;
@@ -162,15 +161,6 @@
             this.label5.TabIndex = 12;
             this.label5.Text = "Label Name*";
             // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(225, 98);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(255, 17);
-            this.label6.TabIndex = 13;
-            this.label6.Text = "*Leave field blank to retrieve all objects";
-            // 
             // textBox_imageSource
             // 
             this.textBox_imageSource.Location = new System.Drawing.Point(260, 16);
@@ -190,7 +180,6 @@
             // panel_export
             // 
             this.panel_export.Controls.Add(this.label7);
-            this.panel_export.Controls.Add(this.label6);
             this.panel_export.Controls.Add(this.textBox_imageSource);
             this.panel_export.Controls.Add(this.button_Convert);
             this.panel_export.Controls.Add(this.debugLabel);
@@ -202,14 +191,14 @@
             this.panel_export.Controls.Add(this.textBox_objectClass);
             this.panel_export.Location = new System.Drawing.Point(49, 174);
             this.panel_export.Name = "panel_export";
-            this.panel_export.Size = new System.Drawing.Size(691, 251);
+            this.panel_export.Size = new System.Drawing.Size(691, 186);
             this.panel_export.TabIndex = 16;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 464);
+            this.ClientSize = new System.Drawing.Size(800, 390);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.numFilesLabel);
             this.Controls.Add(this.textBox_filePath);
@@ -240,7 +229,6 @@
         private System.Windows.Forms.TextBox textBox_objectLabelName;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox textBox_imageSource;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Panel panel_export;

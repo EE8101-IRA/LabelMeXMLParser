@@ -90,10 +90,22 @@ namespace LabelMeXML_Parser
             textBox_filePath.Text = filePath;
         }
 
+        private void SetDebugText(string text)
+        {
+            debugLabel.Visible = true;
+            debugLabel.Text = text;
+        }
+
         private string outputPath = "";
 
         private void ButtonConvert_Click(object sender, EventArgs e)
         {
+            // check if object class or label name was left empty
+            if (string.IsNullOrEmpty(textBox_objectClass.Text) || string.IsNullOrEmpty(textBox_objectLabelName.Text))
+            {
+                SetDebugText("Please key in Object Name and Label Name!");
+                return;
+            }
             SaveToCSV();
         }
 
@@ -110,7 +122,7 @@ namespace LabelMeXML_Parser
             {
                 // Get output path
                 outputPath = saveFileDialog.FileName;
-                //debugLabel.Text = outputPath;
+                //SetDebugText(outputPath);
 
                 // Process the XML files to export into CSV
                 ConvertXMLFiles();
@@ -121,9 +133,6 @@ namespace LabelMeXML_Parser
         {
             // create new training data list
             trainingObjects = new List<TrainingObject>();
-
-            // initialize export values
-            oneObjectClass = (!string.IsNullOrEmpty(textBox_objectClass.Text));
 
             // retrieve all object data from XML files
             foreach (var file in files)
@@ -145,11 +154,10 @@ namespace LabelMeXML_Parser
             }
 
             // Complete
-            debugLabel.Text = "Export Complete";
+            SetDebugText("Export Complete");
         }
 
         private List<TrainingObject> trainingObjects = null;
-        private bool oneObjectClass = false;    // whether to export only a specific object or not (keyed into textBox_objectClass)
 
         private void OpenXMLFile(string file)
         {
@@ -161,7 +169,7 @@ namespace LabelMeXML_Parser
             LabelMeAnnotation labelMeAnnotation = (LabelMeAnnotation)serializer.Deserialize(fs);
 
             // set debug label to display data
-            //debugLabel.Text = labelMeAnnotation.ToString();
+            //SetDebugText(labelMeAnnotation.ToString());
 
             // create TrainingObject record(s)
             if (labelMeAnnotation.objects == null)  // no bounding boxes; bounding box is entire image
@@ -174,8 +182,8 @@ namespace LabelMeXML_Parser
             {
                 foreach (LabelMeObject obj in labelMeAnnotation.objects)
                 {
-                    // Check if object name is correct, if only one object to be exported
-                    if (oneObjectClass && obj.name != textBox_objectClass.Text)
+                    // check object before exporting
+                    if (string.Compare(textBox_objectClass.Text, obj.name) != 0)
                         continue;
 
                     // Create Training Data object
@@ -190,7 +198,7 @@ namespace LabelMeXML_Parser
             return new TrainingObject(annotation,
                                         obj,
                                         textBox_imageSource.Text,
-                                        oneObjectClass ? textBox_objectLabelName.Text : ""
+                                        textBox_objectLabelName.Text
                                      );
         }
     }
