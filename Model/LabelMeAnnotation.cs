@@ -43,6 +43,33 @@ namespace LabelMeXML_Parser.Model
 
         private string[] attributesList = null;
 
+        public int XMin;
+        public int XMax;
+        public int YMin;
+        public int YMax;
+
+        public void CalculateMinMax()
+        {
+            // Set to pt[0] as default
+            XMin = polygon.pt[0].x;
+            XMax = polygon.pt[0].x;
+            YMin = polygon.pt[0].y;
+            YMax = polygon.pt[0].y;
+
+            for (int i = 1; i < polygon.pt.Length; i++)
+            {
+                LabelMePoint pt = polygon.pt[i];
+                if (pt.x > XMax)
+                    XMax = pt.x;
+                else if (pt.x < XMin)
+                    XMin = pt.x;
+                if (pt.y > YMax)
+                    YMax = pt.y;
+                else if (pt.y < YMin)
+                    YMin = pt.y;
+            }
+        }
+
         public int IsOccluded()
         {
             switch (occluded.ToLower())

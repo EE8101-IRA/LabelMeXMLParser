@@ -11,6 +11,8 @@ using System.IO;
 using System.Xml.Serialization;
 
 using LabelMeXML_Parser.Model;
+using LabelMeXML_Parser.DNModel;
+using LabelMeXML_Parser.TFModel;
 
 namespace LabelMeXML_Parser
 {
@@ -20,6 +22,7 @@ namespace LabelMeXML_Parser
          * Constants
          */
         private const string outputFileName = "training.csv";
+        private string selectedTrainingtype = "";
 
         // Constructor
         public Form1()
@@ -30,8 +33,36 @@ namespace LabelMeXML_Parser
 
             textBox_outputFile.Text = outputFileName;
 
+            panel_trainingType.Visible = false;
             panel_export.Visible = false;
+
+            radioButton1.CheckedChanged += new EventHandler(radioButton_CheckedChanged);
+            radioButton2.CheckedChanged += new EventHandler(radioButton_CheckedChanged);
         }
+
+        void radioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton rb = sender as RadioButton;
+
+            if (rb == null)
+            {
+                MessageBox.Show("Sender is not a RadioButton");
+                return;
+            }
+
+            // Ensure that the RadioButton.Checked property
+            // changed to true.
+            if (rb.Checked)
+            {
+                // Keep track of the selected RadioButton by saving a reference
+                // to it.
+                selectedTrainingtype = rb.Text;
+
+                if (!panel_export.Visible)
+                    panel_export.Visible = true;
+            }
+        }
+
 
         /*
          * Variables
@@ -57,8 +88,8 @@ namespace LabelMeXML_Parser
 
                 numFilesLabel.Text = "Number of XML files: " + files.Length;
 
-                if (!panel_export.Visible)
-                    panel_export.Visible = true;
+                if (!panel_trainingType.Visible)
+                    panel_trainingType.Visible = true;
             }
 
             textBox_filePath.Text = browsedFolderPath;
@@ -141,7 +172,16 @@ namespace LabelMeXML_Parser
             }
 
             // convert training data into CSV string
-            TrainingData trainingData = new TrainingData("headers.txt");
+            TrainingData trainingData = null;
+            switch (selectedTrainingtype)
+            {
+                case "Darknet":
+                    trainingData = new TrainingData_DN("headers_dn.txt");
+                    break;
+                case "TensorFlow":
+                    trainingData = new TrainingData_TF("headers_tf.txt");
+                    break;
+            }
             foreach (TrainingObject obj in trainingObjects)
             {
                 trainingData.AddToCSV(obj);
@@ -162,44 +202,63 @@ namespace LabelMeXML_Parser
         private void OpenXMLFile(string file)
         {
             // Open XML file
-            FileStream fs = new FileStream(file, FileMode.Open);
-
-            // Deserialize XML file into data model
-            XmlSerializer serializer = new XmlSerializer(typeof(LabelMeAnnotation));
-            LabelMeAnnotation labelMeAnnotation = (LabelMeAnnotation)serializer.Deserialize(fs);
-
-            // set debug label to display data
-            //SetDebugText(labelMeAnnotation.ToString());
-
-            // create TrainingObject record(s)
-            if (labelMeAnnotation.objects == null)  // no bounding boxes; bounding box is entire image
+            using (FileStream fs = new FileStream(file, FileMode.Open))
             {
-                // Create Training Data object
-                TrainingObject trainingObj = CreateTrainingObject(labelMeAnnotation, null);
-                trainingObjects.Add(trainingObj);
-            }
-            else    // one LabelMeObject per bounding box
-            {
-                foreach (LabelMeObject obj in labelMeAnnotation.objects)
+                // Deserialize XML file into data model
+                XmlSerializer serializer = new XmlSerializer(typeof(LabelMeAnnotation));
+                LabelMeAnnotation labelMeAnnotation = (LabelMeAnnotation)serializer.Deserialize(fs);
+
+                // set debug label to display data
+                //SetDebugText(labelMeAnnotation.ToString());
+
+                // create TrainingObject record(s)
+                if (labelMeAnnotation.objects == null)  // no bounding boxes; bounding box is entire image
                 {
-                    // check object before exporting
-                    if (string.Compare(textBox_objectClass.Text, obj.name) != 0)
-                        continue;
-
                     // Create Training Data object
-                    TrainingObject trainingObj = CreateTrainingObject(labelMeAnnotation, obj);
+                    TrainingObject trainingObj = CreateTrainingObject(labelMeAnnotation, null);
                     trainingObjects.Add(trainingObj);
+                }
+                else    // one LabelMeObject per bounding box
+                {
+                    foreach (LabelMeObject obj in labelMeAnnotation.objects)
+                    {
+                        // check object before exporting
+                        if (string.Compare(textBox_objectClass.Text, obj.name) != 0)
+                            continue;
+
+                        // Create Training Data object
+                        TrainingObject trainingObj = CreateTrainingObject(labelMeAnnotation, obj);
+                        trainingObjects.Add(trainingObj);
+                    }
                 }
             }
         }
 
         private TrainingObject CreateTrainingObject(LabelMeAnnotation annotation, LabelMeObject obj)
         {
-            return new TrainingObject(annotation,
+            TrainingObject trainingObj = null;
+            switch (selectedTrainingtype)
+            {
+                case "Darknet":
+                    trainingObj = new TrainingObject_DN(annotation,
                                         obj,
                                         textBox_imageSource.Text,
                                         textBox_objectLabelName.Text
                                      );
+                    break;
+                case "TensorFlow":
+                    trainingObj = new TrainingObject_TF(annotation,
+                                        obj,
+                                        textBox_objectLabelName.Text
+                                     );
+                    break;
+            }
+            return trainingObj; 
+        }
+
+        private void Label5_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

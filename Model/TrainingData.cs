@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.IO;
 
 namespace LabelMeXML_Parser.Model
 {
-    class TrainingData
+    public abstract class TrainingData
     {
         private string headerText;
         public string BuiltText
@@ -23,21 +26,10 @@ namespace LabelMeXML_Parser.Model
 
         public void AddToCSV(TrainingObject obj)
         {
-            string str = obj.ImageID + "," +
-                        obj.Source + "," + 
-                        obj.LabelName + "," +
-                        obj.Confidence + "," + 
-                        obj.XMin + "," + 
-                        obj.XMax + "," +
-                        obj.YMin + "," +
-                        obj.YMax + "," +
-                        obj.IsOccluded + "," +
-                        obj.IsTruncated + "," +
-                        obj.IsGroupOf + "," +
-                        obj.IsDepiction + "," +
-                        obj.IsInside + "\n";
-
+            string str = ToCSVString(obj);
             BuiltText += str;
         }
+
+        protected abstract string ToCSVString(TrainingObject obj);
     }
 }

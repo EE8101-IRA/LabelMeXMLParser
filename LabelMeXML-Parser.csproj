@@ -53,10 +53,14 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Model\LabelMeAnnotation.cs" />
+    <Compile Include="DNModel\TrainingData_DN.cs" />
+    <Compile Include="DNModel\TrainingObject_DN.cs" />
     <Compile Include="Model\TrainingData.cs" />
     <Compile Include="Model\TrainingObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TFModel\TrainingData_TF.cs" />
+    <Compile Include="TFModel\TrainingObject_TF.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
